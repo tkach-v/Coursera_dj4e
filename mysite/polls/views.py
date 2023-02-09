@@ -25,7 +25,7 @@ class ResultsView(generic.DetailView):
     template_name = 'polls/results.html'
 
 def owner(request):
-    return HttpResponse("Hello, world. 3c9e23a0 is the polls index.")
+    return HttpResponse("Hello, world. 3c9e23a0 is the polls index.     61592633 ")
 
 
 def vote(request, question_id):
