@@ -1,5 +1,5 @@
 {% extends "base_menu.html" %}
- <!-- https://docs.djangoproject.com/en/3.0/ref/contrib/humanize -->
+<!-- https://docs.djangoproject.com/en/3.0/ref/contrib/humanize -->
 {% block content %}
 <span style="float: right;">
 ({{ ad.updated_at}})
@@ -9,12 +9,28 @@
 {% endif %}
 </span>
 <h1>{{ ad.title }}</h1>
+<p>{{ ad.text }}</p>
+<p>Price: {{ ad.price }}</p>
+<img src="{% url 'ads:ad_picture' ad.id %}" alt="">
+{% if user.is_authenticated %}
+<br clear="all"/>
+{% load crispy_forms_tags %}
+<form method="post" action="{% url 'ads:ad_comment_create' ad.id %}">
+    {% csrf_token %}
+    {{ comment_form|crispy }}
+    <input type="submit" value="Submit">
+    <input type="submit" value="All Forums" onclick="window.location.href='{% url 'ads:all' %}';return false;">
+</form>
+{% endif %}
+{% for comment in comments %}
+<p> {{ comment.text }}
+    ({{ comment.updated_at }})
+    {% if user == comment.owner %}
+    <a href="{% url 'ads:ad_comment_delete' comment.id %}"><i class="fa fa-trash"></i></a>
+    {% endif %}
+
+{% endfor %}
 <p>
-{{ ad.text }}
-</p>
-<p>
-</p>
-<p>
-<a href="{% url 'ads:all' %}">All ads</a>
+    <a href="{% url 'ads:all' %}">All ads</a>
 </p>
 {% endblock %}
