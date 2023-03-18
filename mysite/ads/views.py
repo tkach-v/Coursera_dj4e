@@ -3,12 +3,22 @@ from django.urls import reverse_lazy
 from django.views import View
 
 from .forms import CreateForm, CommentForm
-from .models import Ad, Comment
+from .models import Ad, Comment, Fav
 from .owner import *
 
 
 class AdListView(OwnerListView):
     model = Ad
+    def get(self, request) :
+        ad_list = Ad.objects.all()
+        favorites = list()
+        if request.user.is_authenticated:
+            # rows = [{'id': 2}, {'id': 4} ... ]  (A list of rows)
+            rows = request.user.favorite_ads.values('id')
+            # favorites = [2, 4, ...] using list comprehension
+            favorites = [ row['id'] for row in rows ]
+        ctx = {'ad_list' : ad_list, 'favorites': favorites}
+        return render(request, 'ads/ad_list.html', ctx)
 
 
 class AdDetailView(View):
@@ -91,3 +101,31 @@ class CommentDeleteView(OwnerDeleteView):
     def get_success_url(self):
         ad = self.object.ad
         return reverse('ads:ad_detail', args=[ad.id])
+
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.db.utils import IntegrityError
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AddFavoriteView(LoginRequiredMixin, View):
+    def post(self, request, pk) :
+        print("Add PK",pk)
+        a = get_object_or_404(Ad, id=pk)
+        fav = Fav(user=request.user, ad=a)
+        try:
+            fav.save()  # In case of duplicate key
+        except IntegrityError as e:
+            pass
+        return HttpResponse()
+
+@method_decorator(csrf_exempt, name='dispatch')
+class DeleteFavoriteView(LoginRequiredMixin, View):
+    def post(self, request, pk) :
+        print("Delete PK",pk)
+        a = get_object_or_404(Ad, id=pk)
+        try:
+            fav = Fav.objects.get(user=request.user, ad=a).delete()
+        except Fav.DoesNotExist as e:
+            pass
+
+        return HttpResponse()
