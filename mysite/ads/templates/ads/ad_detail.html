@@ -10,6 +10,13 @@
 </span>
 <h1>{{ ad.title }}</h1>
 <p>{{ ad.text }}</p>
+{% if ad.tags.all %}
+<p>Tags:
+  {% for tag in ad.tags.all %}
+  <span style="border:1px #1b1b1f solid; background-color: #a9b4a9;">{{ tag }}</span>
+  {% endfor %}
+</p>
+{% endif %}
 <p>Price: {{ ad.price }}</p>
 <img src="{% url 'ads:ad_picture' ad.id %}" alt="">
 {% if user.is_authenticated %}
@@ -29,7 +36,7 @@
     <a href="{% url 'ads:ad_comment_delete' comment.id %}"><i class="fa fa-trash"></i></a>
     {% endif %}
 
-{% endfor %}
+    {% endfor %}
 <p>
     <a href="{% url 'ads:all' %}">All ads</a>
 </p>
