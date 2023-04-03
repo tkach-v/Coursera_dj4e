@@ -17,8 +17,10 @@ class AdListView(OwnerListView):
             # __icontains for case-insensitive search
             query = Q(title__icontains=strval)
             query.add(Q(text__icontains=strval), Q.OR)
-            query.add(Q(tags__icontains=strval), Q.OR)
-            ad_list = Ad.objects.filter(query).select_related().order_by('-updated_at')[:10]
+            query.add(Q(tags__name__icontains=strval), Q.OR)
+            temp = Ad.objects.filter(query).select_related().order_by('-updated_at')[:10]
+            ad_list = []
+            [ad_list.append(ad) for ad in temp if ad not in ad_list]
         else:
             ad_list = Ad.objects.all().order_by('-updated_at')[:10]
 
